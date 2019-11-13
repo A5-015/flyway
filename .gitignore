@@ -103,5 +103,4 @@ venv.bak/
 # mypy
 .mypy_cache/
 .DS_Store
-dataset/network_traffic_data.csv
-src/dataset/network_traffic_data.csv
+network_traffic_data.csv
