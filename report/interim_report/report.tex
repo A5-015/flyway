@@ -78,7 +78,7 @@ Barkin Simsek,~\IEEEmembership{bs3528@nyu.edu}}% <-this % stops a space
 \subsection{Motivation}
 \IEEEPARstart{P}\lowercase{redicting} traffic is one of the most common timeseries forecasting problems available for tackling. When placed in the context of smart cities, the problem is motivated by the question of "how to enable users to make smarter choices when using transportation networks" \cite{lv2014traffic}. However, this can be broadened to include how smart choices are made for using infrastructure and public spaces in general. \\
 
-\noindent Given that our campus has multiple open spaces for students to study and/or relax, we want to be able to forecast the foot traffic that occurs in the multiple spaces. This could eventually be furthered, and the information organized, to provide a live prediction visualization of foot traffic around campus. 
+\noindent Given that our campus has multiple open spaces for students to study and/or relax, we want to be able to forecast the foot traffic that occurs in the multiple spaces. This could eventually be furthered, and the information organized, to provide a live prediction visualization of foot traffic around campus.
 
 \subsection{Problem Statement}
 
@@ -93,13 +93,49 @@ Barkin Simsek,~\IEEEmembership{bs3528@nyu.edu}}% <-this % stops a space
 
 \subsection{Waitz: Know Before You Go}
 
-\noindent One of the inspirations of this project was the Waitz application developed by students at University of California San Diego (UCSD) \cite{waitz}. They used Raspberry Pi's, loaded with network monitoring firmware and placed at various locations around their campus, to approximate the number of students within a given area. They did so by logging the Bluetooth and MAC addresses of devices within range of the network sniffing Pis.
+\noindent One of the inspirations of this project was the Waitz application developed by students at University of California San Diego (UCSD) \cite{waitz}. They used Raspberry Pi's, loaded with network monitoring firmware and placed at various locations around their campus, to approximate the number of students within a given area. They did so by logging the Bluetooth and MAC addresses of devices within range of the network sniffing Pis.\\
+
+% \begingroup
+%     \centering
+%     \medskip
+%     %width=\columnwidth
+%     \includegraphics[width=0.4\columnwidth]{./images/waitz.png}
+%     \captionof{figure}{Waitz UI}
+%     \label{fig:waitz_ui}
+%     \medskip
+% \endgroup
+% \medskip
+
+\noindent However, their application is relatively simple as they did not use this data to forecast the "busyness" of locations or make predictions. Instead, it seems that they focused more on data collection and visualization. As a result, we thought it would be interesting to implement a similar tool for our campus; in the process, we hoped discover if there are any timeseries patterns we can exploit to provide useful information for students. \\
 
 
 \section{Methodology}
+
+
+\begin{itemize}
+    \item frame.number
+    \item frame.time
+    \item wlan.addr
+    \item wlan.ta
+    \item wlan.ra
+    \item wlan.sa
+    \item wlan.da
+    \item wlan.bssid
+    \item wlan.fc.type
+    \item wlan.fc.type\_subtype
+    \item radiotap.channel.freq
+    \item radiotap.datarate
+    \item radiotap.dbm\_antsignal
+\end{itemize}
+
+
 \subsection{Feasibility}
 
 
+%%%%%%%%
+% NOTE %
+%%%%%%%%
+% include information about some nuances we need to think about or we can extract. For example, do we have to worry about someone "passing by" if their MAC address was available for just a small bit of time. 
 
 
 
