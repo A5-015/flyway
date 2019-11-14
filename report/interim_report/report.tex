@@ -38,7 +38,7 @@
 
 \usepackage{multicol} 
 
-%\raggedbottom
+\raggedbottom
 
 \renewcommand{\ttdefault}{txtt}
 \lstset{
@@ -98,15 +98,15 @@ Barkin Simsek,~\IEEEmembership{bs3528@nyu.edu}}% <-this % stops a space
 
 \noindent Gathering from our previous experience with the New York City (NYC) taxi data set, we had a rough idea on how to approach timeseries data, along with the models and analysis that is carried out on such data. We were able to draw parallels between foot traffic in our project to pickup counts in certain locations in NYC.
 
+\noindent In order to collect foot traffic, we determined that registering the device addresses would be a robust method involving little overhead. Students almost always carry their laptops and mobile devices with them as they move to study areas. Hence, our project focuses on two topics
+
 %%%%%%%%
 % NOTE %
 %%%%%%%%
 % include info about how we gather the data, why we gather the data that way, and why we get that specific data or those features
 
 \section{Existing Body of Work}
-
 \subsection{Past Projects}
-
 \noindent One of the inspirations of this project was the Waitz application developed by students at University of California San Diego (UCSD) \cite{waitz}. They used Raspberry Pi's, loaded with network monitoring firmware and placed at various locations around their campus, to approximate the number of students within a given area. They did so by logging the Bluetooth and MAC addresses of devices within range of the network sniffing Raspberry Pi's. It is not clear how they tackled the issue of mapping the number of devices to the number of students.\\
 
 % \begingroup
@@ -150,7 +150,7 @@ Networks (M-FRNN)" \cite{wang2018occupancy} model as part of their project to pr
 \end{equation}
 
 \medskip
-\noindent They then use the quantities $X_{k}^{o-i}$ and $X_{k}^{i-i}$ as an updated input for their hidden layer. The output of the hidden layer is sent to something called the Context layer (serving as a short-term memory), which then feeds back into the hidden layer at each run of the network \cite{wang2018occupancy}. Their error function was simply a square of the actual occupancy subtracted from the predicted occupancy\cite{wang2018occupancy}. \\
+\noindent They then use the quantities $X_{k}^{o-i}$ and $X_{k}^{i-i}$ as an updated input for their hidden layer. The output of the hidden layer is sent to something called the Context layer (serving as a short-term memory), which then feeds back into the hidden layer at each run of the network \cite{wang2018occupancy}. Their error function was simply a square of the actual occupancy subtracted from the predicted occupancy\cite{wang2018occupancy}.
 
 \noindent Another extremely important takeaway from this paper was the model assessment. Previously, we were only familiar with mean absolute percentage error (MAPE) and mean absolute error (MAE) as metrics. However, the researchers pointed out that these metrics "assume that an accurate prediction should have exactly
 same number as the observed occupants number" \cite{wang2018occupancy}. This is usually harmful to model assessment because a small tolerance should be granted. As long as the difference is minute, an "incorrect" output value can still be classified as an accurate prediction. Hence, they used a metric called the X-accuracy. They found that their M-FRNN model performed very well when the tolerenace (X) was set to 3, providing 80\% accuracy on just the 3rd day. \\
@@ -162,7 +162,7 @@ same number as the observed occupants number" \cite{wang2018occupancy}. This is 
 \section{Methodology}
 \noindent The methodology for realizing this project has 4 main steps: data collection, data processing, data analysis, and user interface. All of these steps are feasible by using the correct hardware with correct machine learning tools.
 
-\subsection{Feasibility}
+\subsection{Feasibility and Applicability}
 \subsubsection{Data Collection} Data collection is the lowest level in the process and it is achieved by using ARM based Raspberry Pi Zero computers since they have builtin bluetooth and WIFI chips. Besides having the WIFI chip as an hardware, the WIFI chip itself should be supporting the "monitoring" mode for monitoring the wireless traffic. The WIFI chip of Raspberry Pi Zero also has this monitoring feature that enables the data collection for the project.
 
 \begingroup
@@ -209,10 +209,26 @@ same number as the observed occupants number" \cite{wang2018occupancy}. This is 
 
 
 \subsubsection{Data Processing} 
-After the data collection, the data can be processed to remove invalid and empty values as usual. Later, the MAC addresses collected under the \texttt{wlan} fields should be validated using the MAC address rules defined by the Institute of Electrical and Electronics Engineers (IEEE). Later, the MAC addresses should be converted into their decimal representations. Normally, MAC addresses are hexadecimal values and they are stored as strings since they contain letters inside them. However, we cannot use strings with machine learning algorithms and we need to get the decimal representation of each mac address to use the machine learning algorithms for analysing data in the next step. Thus, the data processing step is crucial for having high quality data for training. \\
+After the data collection, the data can be processed to remove invalid and empty values as usual. Later, the MAC addresses collected under the \texttt{wlan} fields should be validated using the MAC address rules defined by the Institute of Electrical and Electronics Engineers (IEEE). Later, the MAC addresses should be converted into their decimal representations. Normally, MAC addresses are concatenated hexadecimal values and they are stored as strings since they contain letters inside them. However, we cannot use strings with machine learning algorithms and we need to get the decimal representation of each mac address to use the machine learning algorithms for analysing data in the next step. In addition to this, storing MAC addresses of devices might violate privacy of individuals. Therefore, MAC addresses can be hashed using hashing algorithms like MD5 to anonymized the data collected. Hash algorithms generate a hexadecimal value based on the input. Therefore, using a hashing algorithm is also useful for converting the non-numerical MAC address data into a numerical value as shown in the example below:
+\medskip
+\begin{lstlisting}[language=python, numbers=none, mathescape]
+import hashlib
+mac = "34:97:f6:ac:9c:10"
+obj = hashlib.md5(mac.encode())
+hash_hex = obj.hexdigest()
+hash_dec = int(hash_hex, 16)
+print(hash_dec)
+\end{lstlisting}
+\medskip
+\noindent The output of the operation above would be $239801908384185789790176606167296229703$ and it is not reversible, which means that the original MAC address is no longer stored. That being said the hashing function will generate the same number if same exact MAC address is given and this is helpful for finding and avoiding duplicates in the data while preserving the privacy. Thus, the data processing step is crucial for having high quality data for training. \\
 
 \subsubsection{Data Analysis} 
 % include information about some nuances we need to think about or we can extract. For example, do we have to worry about someone "passing by" if their MAC address was available for just a small bit of time. 
+Data analysis is the most critical part of the project after collecting and processing the data.
+
+
+
+
 
 
 \begingroup
@@ -227,25 +243,19 @@ After the data collection, the data can be processed to remove invalid and empty
 
 
 \subsubsection{User Interface} 
-After the data collection, processing, and analysis steps are completed, the final step is having a very basic user interface for presenting the predicted data. For achieving this, we are going to use \href{https://getbootstrap.com/}{Bootstrap library} for designing the user interface itself and use the PHP language for making the webpage dynamic that it can update the data shown with the real time data. A SQLite database will be used to store the collected and processed data. We already have a web hosting and a web domain (\href{https://nyuad.app/}{nyuad.app}) that we already have for other projects as well. So, the app is going to be located at \href{https://nyuad.app/flyway/}{nyuad.app/flyway}.
+After the data collection, processing, and analysis steps are completed, the final step is having a very basic user interface for presenting the predicted data. For achieving this, we are going to use \href{https://getbootstrap.com/}{Bootstrap library} for designing the user interface itself and use the PHP language for making the webpage dynamic that it can update the data shown with the real time data. A SQLite database will be used to store the collected and processed data. We already have a web hosting and a web domain (\href{https://nyuad.app/}{nyuad.app}) that we already have for other projects as well. So, the app is going to be located at \href{https://nyuad.app/flyway/}{nyuad.app/flyway}. The progress of the app can be also seen at \href{https://nyuad.app/flyway/}{nyuad.app/flyway} as well.
 
 \begingroup
     \center
     \medskip
-    \includegraphics[width=0.6\columnwidth]{report/interim_report/images/ux.png}
+    \includegraphics[width=0.75\columnwidth]{report/interim_report/images/ux.png}
     \captionof{figure}{Proposed user interface}
     \label{fig:ux}
     \medskip
 \endgroup
 
-\subsubsection{Feasibility Conclusion} 
+\section{Conclusion} 
 We already figured out the exact tools and software that we need to use to make this project possible. We also have some previous experience with these software and tools from previous projects. Therefore, we believe that this project is feasible to build by using the tools and knowledge available to us.
-
-
-
-
-\subsection{Applicability to Solving the Problem}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% Experimental Method %%
