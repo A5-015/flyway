@@ -98,7 +98,7 @@ Barkin Simsek,~\IEEEmembership{bs3528@nyu.edu}}% <-this % stops a space
 
 \noindent Gathering from our previous experience with the New York City (NYC) taxi data set, we had a rough idea on how to approach timeseries data, along with the models and analysis that is carried out on such data. We were able to draw parallels between foot traffic in our project to pickup counts in certain locations in NYC.
 
-\noindent In order to collect foot traffic, we determined that registering the device addresses would be a robust method involving little overhead. Students almost always carry their laptops and mobile devices with them as they move to study areas. Hence, our project focuses on two topics
+\noindent In order to collect foot traffic, we determined that registering the device addresses would be a robust method involving little overhead. Students almost always carry their laptops and mobile devices with them as they move to study areas. Hence, our project could potentially focus on two topics: (1) how do we map the MAC addresses to the number of people and (2) are we able to forecast the "busyness" of a given space. As tackling both of these aspects may not fit within our timeframe, we have decided to focus on the latter. We recognize the former will remain a challenge; however, we will approach it either with some simplifying assumptions or a pre-existing solution.
 
 %%%%%%%%
 % NOTE %
@@ -160,10 +160,10 @@ same number as the observed occupants number" \cite{wang2018occupancy}. This is 
 
 
 \section{Methodology}
-\noindent The methodology for realizing this project has 4 main steps: data collection, data processing, data analysis, and user interface. All of these steps are feasible by using the correct hardware with correct machine learning tools.
+\noindent The methodology for realizing this project has 4 main steps: data collection, data processing, data analysis, and user interface. All of these steps are feasible by using the correct hardware with correct machine learning tools. In this section, the feasibility and applicability of the solution to the problem will be discussed by explaining the steps on the project in detail.
 
-\subsection{Feasibility and Applicability}
-\subsubsection{Data Collection} Data collection is the lowest level in the process and it is achieved by using ARM based Raspberry Pi Zero computers since they have builtin bluetooth and WIFI chips. Besides having the WIFI chip as an hardware, the WIFI chip itself should be supporting the "monitoring" mode for monitoring the wireless traffic. The WIFI chip of Raspberry Pi Zero also has this monitoring feature that enables the data collection for the project.
+\subsection{Data Collection}
+\noindent Data collection is the lowest level in the process and it is achieved by using ARM based Raspberry Pi Zero computers since they have builtin bluetooth and WIFI chips. Besides having the WIFI chip as an hardware, the WIFI chip itself should be supporting the "monitoring" mode for monitoring the wireless traffic. The WIFI chip of Raspberry Pi Zero also has this monitoring feature that enables the data collection for the project.
 
 \begingroup
     \center
@@ -174,7 +174,16 @@ same number as the observed occupants number" \cite{wang2018occupancy}. This is 
     \medskip
 \endgroup
 
-\noindent The  Raspberry Pi Zero computer is running a special version of the Linux operating system and this also helps us with the data collection since Linux natively supports the \texttt{dumpcap} tool, which was used to collect the data packages in the air. Further details related to the \texttt{dumpcap} network traffic dump tool can be found  \href{https://linux.die.net/man/1/dumpcap}{here}.\\
+\noindent The  Raspberry Pi Zero computer is running a special version of the Linux operating system and this also helps us with the data collection since Linux natively supports the \texttt{dumpcap} tool, which was used to collect the data packages in the air. Further details related to the \texttt{dumpcap} network traffic dump tool can be found  \href{https://linux.die.net/man/1/dumpcap}{here}. Dumpcap is also capable of recording in both active and passive scanning modes that we can collect an extensive amount of data about the devices in the surrounding space.
+
+\begingroup
+    \center
+    \medskip
+    \includegraphics[width=\columnwidth]{report/interim_report/images/scan.png}
+    \captionof{figure}{The difference between the active and passive scanning is demonstrated \cite{scanning_image}}
+    \label{fig:scannig_types}
+    \medskip
+\endgroup
 
 \noindent When a WIFI chip is in the monitoring mode it is not capable of collecting private data since WIFI traffic between devices and the routers are already encrypted with some sort of password protection. That being said, we can still get various data regarding the source and destination of the data packages. These non-private information is enough for our project since we want to be able to approximately count the number devices and people in a space rather than spying on personal data. The following are the data fields that can be collected while monitoring WIFI signals in the monitoring mode:
 
@@ -208,8 +217,8 @@ same number as the observed occupants number" \cite{wang2018occupancy}. This is 
 \endgroup
 
 
-\subsubsection{Data Processing} 
-After the data collection, the data can be processed to remove invalid and empty values as usual. Later, the MAC addresses collected under the \texttt{wlan} fields should be validated using the MAC address rules defined by the Institute of Electrical and Electronics Engineers (IEEE). Later, the MAC addresses should be converted into their decimal representations. Normally, MAC addresses are concatenated hexadecimal values and they are stored as strings since they contain letters inside them. However, we cannot use strings with machine learning algorithms and we need to get the decimal representation of each mac address to use the machine learning algorithms for analysing data in the next step. In addition to this, storing MAC addresses of devices might violate privacy of individuals. Therefore, MAC addresses can be hashed using hashing algorithms like MD5 to anonymized the data collected. Hash algorithms generate a hexadecimal value based on the input. Therefore, using a hashing algorithm is also useful for converting the non-numerical MAC address data into a numerical value as shown in the example below:
+\subsection{Data Processing} 
+\noindent After the data collection, the data can be processed to remove invalid and empty values as usual. Later, the MAC addresses collected under the \texttt{wlan} fields should be validated using the MAC address rules defined by the Institute of Electrical and Electronics Engineers (IEEE). Later, the MAC addresses should be converted into their decimal representations. Normally, MAC addresses are concatenated hexadecimal values and they are stored as strings since they contain letters inside them. However, we cannot use strings with machine learning algorithms and we need to get the decimal representation of each mac address to use the machine learning algorithms for analysing data in the next step. In addition to this, storing MAC addresses of devices might violate privacy of individuals. Therefore, MAC addresses can be hashed using hashing algorithms like MD5 to anonymized the data collected. Hash algorithms generate a hexadecimal value based on the input. Therefore, using a hashing algorithm is also useful for converting the non-numerical MAC address data into a numerical value as shown in the example below:
 \medskip
 \begin{lstlisting}[language=python, numbers=none, mathescape]
 import hashlib
@@ -222,40 +231,38 @@ print(hash_dec)
 \medskip
 \noindent The output of the operation above would be $239801908384185789790176606167296229703$ and it is not reversible, which means that the original MAC address is no longer stored. That being said the hashing function will generate the same number if same exact MAC address is given and this is helpful for finding and avoiding duplicates in the data while preserving the privacy. Thus, the data processing step is crucial for having high quality data for training. \\
 
-\subsubsection{Data Analysis} 
+\subsection{Data Analysis} 
 % include information about some nuances we need to think about or we can extract. For example, do we have to worry about someone "passing by" if their MAC address was available for just a small bit of time. 
-Data analysis is the most critical part of the project after collecting and processing the data.
+\noindent Data analysis is the most critical part of the project after collecting and processing the data. The first challenge that needs to be addressed is the identify people who just pass by the location or temporarily visit the location that is being monitored. This is important, otherwise there will be too much variation in the prediction and these predictions will not accurately represent the true crowdedness of the location being monitored. Based on the background research we have conducted, we realized that we can use Markov-based feedback  Recurrent Neural Networks (M-FRNN) to overcome the problem identifying people who are just passing by the location. The details of the model are explained under the "literature" subsection. Furthermore, we are going to use the signal strength and frequency information (data fields that start with \texttt{radiotap}) to filter signals that are coming from far locations that are outside of the monitored location. \\
+
+\noindent Additionally, we know about the maximum capacity of each location based on the architectural plans and we can use that number and the our predicted number to have a sense about crowdedness of the location that is being monitored. Furthermore, the Institute of Electrical and Electronics Engineers (IEEE) assigns specific MAC address prefixes to specific companies and they publish this data publicly. So, we can actually differentiate different devices based on their brands and understand if a device is a laptop or a mobile phone or a tablet or a watch. By using this information, we are going to fine tune the crowdedness prediction we generated by accounting the possibility of one person carrying multiple WIFI devices.
+
+
+%\begingroup
+%    \center
+%    \medskip
+%    \includegraphics[width=\columnwidth]{report/interim_report/images/clustering.png}
+%    \captionof{figure}{Illustration for clustering the WIFI devices nearby}
+%    \label{fig:clustering}
+%    \medskip
+%\endgroup
 
 
 
-
-
-
-\begingroup
-    \center
-    \medskip
-    \includegraphics[width=\columnwidth]{report/interim_report/images/clustering.png}
-    \captionof{figure}{Illustration for clustering the WIFI devices nearby}
-    \label{fig:clustering}
-    \medskip
-\endgroup
-
-
-
-\subsubsection{User Interface} 
-After the data collection, processing, and analysis steps are completed, the final step is having a very basic user interface for presenting the predicted data. For achieving this, we are going to use \href{https://getbootstrap.com/}{Bootstrap library} for designing the user interface itself and use the PHP language for making the webpage dynamic that it can update the data shown with the real time data. A SQLite database will be used to store the collected and processed data. We already have a web hosting and a web domain (\href{https://nyuad.app/}{nyuad.app}) that we already have for other projects as well. So, the app is going to be located at \href{https://nyuad.app/flyway/}{nyuad.app/flyway}. The progress of the app can be also seen at \href{https://nyuad.app/flyway/}{nyuad.app/flyway} as well.
+\subsection{User Interface} 
+\noindent After the data collection, processing, and analysis steps are completed, the final step is having a very basic user interface for presenting the predicted data. For achieving this, we are going to use \href{https://getbootstrap.com/}{Bootstrap library} for designing the user interface itself and use the PHP language for making the webpage dynamic that it can update the data shown with the real time data. A SQLite database will be used to store the collected and processed data. We already have a web hosting and a web domain (\href{https://nyuad.app/}{nyuad.app}) that we already have for other projects as well. So, the app is going to be located at \href{https://nyuad.app/flyway/}{nyuad.app/flyway}. The progress of the app can be also seen at \href{https://nyuad.app/flyway/}{nyuad.app/flyway} as well.
 
 \begingroup
     \center
     \medskip
-    \includegraphics[width=0.75\columnwidth]{report/interim_report/images/ux.png}
+    \includegraphics[width=0.8\columnwidth]{report/interim_report/images/ux.png}
     \captionof{figure}{Proposed user interface}
     \label{fig:ux}
     \medskip
 \endgroup
 
 \section{Conclusion} 
-We already figured out the exact tools and software that we need to use to make this project possible. We also have some previous experience with these software and tools from previous projects. Therefore, we believe that this project is feasible to build by using the tools and knowledge available to us.
+\noindent We have already figured out the exact tools and software that we need to successfully undertake this project. We also have some previous experience with these software and tools from previous projects. Given that this topic is well-covered, in casual materials as well as in peer-reviewed literature, we also believe there is enough inspiration and guidance available to us. Therefore, we believe that this project is feasible to build by using the tools and knowledge available to us.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% Experimental Method %%
