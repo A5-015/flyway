@@ -11,7 +11,7 @@
 
 \usepackage{amsmath}
 \usepackage{amssymb}
-
+\usepackage{hyperref}
 \usepackage{lipsum}
 
 \usepackage[style=ieee]{biblatex}
@@ -38,7 +38,7 @@
 
 \usepackage{multicol} 
 
-\raggedbottom
+%\raggedbottom
 
 \begin{document}
 
@@ -89,11 +89,11 @@ Barkin Simsek,~\IEEEmembership{bs3528@nyu.edu}}% <-this % stops a space
 %%%%%%%%
 % include info about how we gather the data, why we gather the data that way, and why we get that specific data or those features
 
-\section{Existing Literature and Body of Work}
+\section{Existing Body of Work}
 
-\subsection{Waitz: Know Before You Go}
+\subsection{Past Projects}
 
-\noindent One of the inspirations of this project was the Waitz application developed by students at University of California San Diego (UCSD) \cite{waitz}. They used Raspberry Pi's, loaded with network monitoring firmware and placed at various locations around their campus, to approximate the number of students within a given area. They did so by logging the Bluetooth and MAC addresses of devices within range of the network sniffing Pis.\\
+\noindent One of the inspirations of this project was the Waitz application developed by students at University of California San Diego (UCSD) \cite{waitz}. They used Raspberry Pi's, loaded with network monitoring firmware and placed at various locations around their campus, to approximate the number of students within a given area. They did so by logging the Bluetooth and MAC addresses of devices within range of the network sniffing Pis. It is not clear how they tackled the issue of mapping the number of devices to the number of students.\\
 
 % \begingroup
 %     \centering
@@ -106,12 +106,32 @@ Barkin Simsek,~\IEEEmembership{bs3528@nyu.edu}}% <-this % stops a space
 % \endgroup
 % \medskip
 
-\noindent However, their application is relatively simple as they did not use this data to forecast the "busyness" of locations or make predictions. Instead, it seems that they focused more on data collection and visualization. As a result, we thought it would be interesting to implement a similar tool for our campus; in the process, we hoped discover if there are any timeseries patterns we can exploit to provide useful information for students. \\
+\noindent However, their application is relatively simple as they did not use this data to forecast the "busyness" of locations or make predictions. Instead, it seems that they focused more on data collection and visualization. As a result, we thought it would be interesting to implement a similar tool for our campus; in the process, we hoped discover if there are any timeseries patterns we can exploit to provide useful information for students.
 
+\subsection{Literature}
+
+\noindent Unsurprisingly, there have been several attempts at using machine learning to determine "crowdedness" or "busyness". One of the benefits of searching through published work was being able to pick up on vocabulary within the field of research, making it easier to find other works. \\
+
+\noindent We found that published work refers to this topic as "occupancy prediction" using "Wifi probing"\cite{wang2018occupancy}. Specifically, the work published by Wang et. al. determined five main characteristics in their occupancy prediction project. They realized their collected data had a "time-series characteristics" \cite{wang2018occupancy}, validating our hypothesis that occupancy is relative to time of day, as well as the idea that past data can feasibly predict future data. While this may be trivial to the overall project, it was a source of confidence for our project as it implied we could successfully build a reasonably performing model. \\
+
+\noindent The researchers implemented an "Markov-based feedback Recurrent Neural
+Networks (M-FRNN)" \cite{wang2018occupancy} model as part of their project to predict occupancy
 
 \section{Methodology}
+\noindent The methodology for realizing this project has 4 main steps: data collection, data processing, data analysis, and user interface. Data collection is the lowest level in the process and it is achieved by using ARM based Raspberry Pi Zero computers since they have builtin bluetooth and WIFI chips. Besides having the WIFI chip as an hardware, the WIFI chip itself should be supporting the "monitoring" mode for monitoring the wireless traffic. The WIFI chip of Raspberry Pi Zero also has this monitoring feature that enables the data collection for the project.
 
-\texttt{dumpcap}
+\begingroup
+    \center
+    \medskip
+    \includegraphics[width=0.6\columnwidth]{report/interim_report/images/raspi.png}
+    \captionof{figure}{Raspberry Pi Zero used for data collection}
+    \label{fig:raspi}
+    \medskip
+\endgroup
+
+\noindent The  Raspberry Pi Zero computer is running a special version of the Linux operating system and this also helps us with the data collection since Linux natively supports the \texttt{dumpcap} tool, which was used to collect the data packages in the air. Further details related to the \texttt{dumpcap} network traffic dump tool can be found  \href{https://linux.die.net/man/1/dumpcap}{here}.\\
+
+\noindent When a WIFI chip is in the monitoring mode it is not capable of collecting private data since WIFI traffic between devices and the routers are already encrypted with some sort of password protection. That being said, we can still get various data regarding the source and destination of the data packages. These non-private information is enough for our project since we want to be able to approximately count the number devices and people in a space rather than spying on personal data. The following are the data fields that can be collected while monitoring WIFI signals in the monitoring mode:
 
 \begin{itemize}
     \item frame.number
@@ -128,6 +148,8 @@ Barkin Simsek,~\IEEEmembership{bs3528@nyu.edu}}% <-this % stops a space
     \item radiotap.datarate
     \item radiotap.dbm\_antsignal
 \end{itemize}
+
+\noindent 
 
 
 \subsection{Feasibility}
@@ -156,7 +178,7 @@ Barkin Simsek,~\IEEEmembership{bs3528@nyu.edu}}% <-this % stops a space
 %% Discussion %%
 %%%%%%%%%%%%%%%%
 
-
+\printbibliography
 
 \end{document}
 
