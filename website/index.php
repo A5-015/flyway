@@ -1,6 +1,6 @@
 <?PHP
 
-$mysqli = new mysqli("localhost","bsimsekc_flyway","w!ZcOd@TTAEF","bsimsekc_flyway");
+$mysqli = new mysqli("localhost","bsimsekc_flyway","insert_password_here","bsimsekc_flyway");
 
 // Check connection
 if ($mysqli -> connect_errno) {
@@ -9,12 +9,14 @@ if ($mysqli -> connect_errno) {
 }
 
 /*
-// For inserting dummy data for a week
-for ($y = 0; $y < 7; $y++) {
-    for ($x = 0; $x < 24; $x++) {
-        $rand = rand(0, 15);
-        $sql = "INSERT INTO crowdedness (location_id, day_of_week, hour_of_day, people_count) VALUES ('3', '$y', '$x:00:00', '$rand')";
-        $mysqli->query($sql);
+for ($i = 0; $i < 3; $i++) {
+    // For inserting dummy data for a week
+    for ($y = 0; $y < 7; $y++) {
+        for ($x = 0; $x < 24; $x++) {
+            $rand = rand(0, 100);
+            $sql = "INSERT INTO crowdedness (location_id, day_of_week, hour_of_day, crowdedness) VALUES ('$i', '$y', '$x:00:00', '$rand')";
+            $mysqli->query($sql);
+        }
     }
 }
 */
@@ -23,11 +25,14 @@ $page_selection = $_GET['loc'];
 
 // Get current day of the week
 $current_day_num = date("w", strtotime(date('l')));
+$current_day_num = $current_day_num-1;
 
 // Get hour of the day
 date_default_timezone_set("Asia/Dubai");
 $current_hour = new DateTime();
 $current_hour = $current_hour->format('H:i:s');
+//$current_hour[0] = 1;
+//$current_hour[1] = 5;
 $current_hour[3] = 0;
 $current_hour[4] = 0;
 $current_hour[6] = 0;
@@ -52,21 +57,83 @@ if($page_selection == ""){
     $dowMap = array('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday');
     $selected_day = $dowMap[$day_selection];
 
+
+    // Get information relatd to percentage bar
     $sql = "SELECT * FROM crowdedness INNER JOIN locations ON locations.location_id=crowdedness.location_id
             WHERE crowdedness.day_of_week = '$current_day_num' AND crowdedness.hour_of_day = '$current_hour' AND crowdedness.location_id = '$page_selection' ";
     //echo $sql;
     $result = $mysqli->query($sql);
 
-    $sql = "SELECT hour_of_day, people_count FROM crowdedness WHERE crowdedness.location_id = '$page_selection' AND crowdedness.day_of_week = '$day_selection'";
+
+    // Get information for the graphs
+    if($day_selection > $current_day_num){
+        $predictions_enabled = true;
+
+        $sql = "SELECT hour_of_day, crowdedness FROM crowdedness WHERE crowdedness.location_id = '$page_selection' AND crowdedness.day_of_week = '$day_selection' ";
+        //echo $sql;
+        $result_for_plot = $mysqli->query($sql);
+
+        $predicted_xarr = array();
+        $predicted_yarr = array();
+
+        while($row = $result_for_plot->fetch_assoc()) {
+            array_push($predicted_xarr, date("g:i A", strtotime($row["hour_of_day"])));
+            array_push($predicted_yarr, round($row["crowdedness"]*100));
+        }
+
+    }else if($day_selection == $current_day_num){
+        $predictions_enabled = true;
+
+        $sql = "SELECT hour_of_day, crowdedness FROM crowdedness WHERE crowdedness.location_id = '$page_selection' AND crowdedness.day_of_week = '$day_selection' AND crowdedness.hour_of_day < '$current_hour'";
+        //echo $sql;
+        $result_for_plot = $mysqli->query($sql);
+
+        $actual_xarr = array();
+        $actual_yarr = array();
+
+        while($row = $result_for_plot->fetch_assoc()) {
+            array_push($actual_xarr, date("g:i A", strtotime($row["hour_of_day"])));
+            array_push($actual_yarr, round($row["crowdedness"]*100));
+        }
+
+
+        $sql = "SELECT hour_of_day, crowdedness FROM crowdedness WHERE crowdedness.location_id = '$page_selection' AND crowdedness.day_of_week = '$day_selection' AND crowdedness.hour_of_day >= '$current_hour'";
+        //echo $sql;
+        $result_for_plot = $mysqli->query($sql);
+
+        $predicted_xarr = array();
+        $predicted_yarr = array();
+
+        while($row = $result_for_plot->fetch_assoc()) {
+            array_push($predicted_xarr, date("g:i A", strtotime($row["hour_of_day"])));
+            array_push($predicted_yarr, round($row["crowdedness"]*100));
+        }
+
+    }else{
+        $predictions_enabled = false;
+
+        $sql = "SELECT hour_of_day, crowdedness FROM crowdedness WHERE crowdedness.location_id = '$page_selection' AND crowdedness.day_of_week = '$day_selection'";
+        //echo $sql;
+        $result_for_plot = $mysqli->query($sql);
+
+        $actual_xarr = array();
+        $actual_yarr = array();
+
+        while($row = $result_for_plot->fetch_assoc()) {
+            array_push($actual_xarr, date("g:i A", strtotime($row["hour_of_day"])));
+            array_push($actual_yarr, round($row["crowdedness"]*100));
+        }
+
+    }
+
+
+    // Get information for the peak time
+    $sql = "SELECT day_of_week, hour_of_day, crowdedness FROM crowdedness WHERE location_id = $page_selection ORDER BY crowdedness DESC LIMIT 1";
     //echo $sql;
-    $result_for_plot = $mysqli->query($sql);
+    $result_for_peak_time = $mysqli->query($sql);
 
-    $xarr = array();
-    $yarr = array();
-
-    while($row = $result_for_plot->fetch_assoc()) {
-        array_push($xarr, date("g:i A", strtotime($row["hour_of_day"])));
-        array_push($yarr, $row["people_count"]);
+    while($row = $result_for_peak_time->fetch_assoc()) {
+        $peak_time_message = "Typically busiest at ".date("g:i A", strtotime($row["hour_of_day"]))." on ".$dowMap[$row["day_of_week"]];
     }
 
 }
@@ -75,11 +142,14 @@ $least_busy_place_count = PHP_INT_MAX;
 
 if ($result->num_rows >= 0) {
     while($row = $result->fetch_assoc()) {
-        $crowdedness = ($row["people_count"]/$row["capacity"]) * 100;
+        //$crowdedness = ($row["people_count"]/$row["capacity"]) * 100;
+        $crowdedness = $row["crowdedness"]*100;
         $crowdedness = round($crowdedness);
 
-        if($crowdedness <= 50){
-            $crowdedness_message = "Not busy ".$crowdedness."%";
+        if($crowdedness <= 30){
+            $crowdedness_message = "Not Busy ".$crowdedness."%";
+        }else if($crowdedness <= 50){
+            $crowdedness_message = "Moderate Busy ".$crowdedness."%";
         }else if($crowdedness <= 75){
             $crowdedness_message = "Busy ".$crowdedness."%";
         }else if($crowdedness <= 100){
@@ -104,10 +174,10 @@ if ($result->num_rows >= 0) {
             $closed_message = "Open";
         }
 
-        $temp_app = array(  "people_count" => $row["people_count"],
+        $temp_app = array(  //"people_count" => $row["people_count"],
                             "capacity" => $row["capacity"],
                             "name" => $row["name"],
-                            "message" => $row["message"],
+                            "message" => $peak_time_message,
                             "hours" => $row["hours"],
                             "crowdedness" => $crowdedness,
                             "crowdedness_message" => $crowdedness_message,
@@ -169,7 +239,7 @@ echo "</pre>";
             <?PHP
                 if($page_selection == "-1"){
                     echo "<div class='row'>";
-                    echo "<h5>".$least_busy_place_message."</h5>";
+                    echo "<h5 style='font-size:1.15rem'>".$least_busy_place_message."</h5>";
 
                     foreach($location_array as $key => $value){
 
@@ -244,31 +314,67 @@ echo "</pre>";
                             <div id='graphDiv' style='display: flex; flex-wrap: wrap; width: 100%;'></div>
 
                             <script>
-                                var xarr = ".json_encode($xarr).";
-                                var yarr = ".json_encode($yarr).";
-                                console.log(xarr);
-                                console.log(yarr);
+                                var actual_xarr = ".json_encode($actual_xarr).";
+                                var actual_yarr = ".json_encode($actual_yarr).";
+
                                 var trace1 = {
-                                    x: xarr,
-                                    y: yarr,
+                                    x: actual_xarr,
+                                    y: actual_yarr,
+                                    name: 'Actual',
                                     type: 'bar'
                                 };
 
-                                var data = [trace1];
+                                ";
 
+
+                        if($predictions_enabled){
+                            echo "var predicted_xarr = ".json_encode($predicted_xarr).";";
+                            echo "var predicted_yarr = ".json_encode($predicted_yarr).";";
+
+                            echo "
+                                    var trace2 = {
+                                        x: predicted_xarr,
+                                        y: predicted_yarr,
+                                        // opacity: 0.75,
+                                        name: 'Predicted',
+                                        type: 'bar'
+                                    };
+                                ";
+
+                            echo "var data = [trace1, trace2];";
+
+                        } else {
+                            echo "var data = [trace1];";
+
+                        }
+
+                        echo "
                                 var layout = {
                                     title: '',
+
+                                    showlegend: true,
+
+                                    legend: {
+                                        xanchor: 'right',
+                                        x: 1,
+                                        y: 1.1,
+                                        orientation: 'h'
+                                    },
+
                                     xaxis: {
                                         title: 'Hour of the day',
                                         showgrid: false,
                                         zeroline: false,
                                         fixedrange: true
                                     },
+
                                     yaxis: {
-                                        title: 'Crowdedness on ".$selected_day."',
+                                        title: 'Percent Crowdedness on ".$selected_day."',
                                         showline: false,
-                                        fixedrange: true
+                                        fixedrange: true,
+                                        //range: [0, 100]
                                     },
+
                                     margin: {
                                         t: 30, //top margin
                                         l: 50, //left margin
