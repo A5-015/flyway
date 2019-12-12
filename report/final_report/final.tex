@@ -423,7 +423,7 @@ We finally settled on a modular approach that involved training models separatel
     \medskip
 \endgroup
 
-Finally, we are able to infer that our weakest link was the package count LSTM model, as there is a significant and growing difference between the train and test curves as the number of epochs increases as shown in Figure \ref{fig:loss_fc}. Here our model was most likely overfitting to the training data. 
+\noindent Finally, we are able to infer that our weakest link was the package count LSTM model, as there is a significant and growing difference between the train and test curves as the number of epochs increases as shown in Figure \ref{fig:loss_fc}. Here our model was most likely overfitting to the training data. 
 
 \begingroup
     \center
@@ -450,41 +450,23 @@ Finally, we are able to infer that our weakest link was the package count LSTM m
 %%%%%%%%%%%%%%%%
 % Yes, he wants separate conclusion and discussion
 \section{Discussion} 
+\noindent The results show that the LSTM model was successful at predicting the patterns in the collected time series data. This being said, the model was not particularly successful at picking the spikes in the data. Instead, the produced predictions more smoothed rather than exact estimates. This might sound like a negative thing with this project but actually it is something good. In overall, our project aims to provide predictions about the overall crowdedness in different locations around the NYUAD campus. The spikes captured in the data are usually occasions where a group of people enter into the room and leave without spending much time. Yes, these sudden groups of people contribute to the crowdedness for a short time but they don't contribute to the overall crowdedness of the space. Therefore, our LSTM model can tackle the problem with such sort time visitors and get a more smoothed result that represents a bigger time span.\\
 
+\noindent As mentioned earlier, our work is using Wang. et. al’s work as a foundation and builds on top of it. One of the contributions we made on top of Wang. et. al’s work was using the data packages as a part of our prediction mechanism. Using the number of data packages is not something we have never seen before in the literature and it worked very well as well. We have used both predicted number of unique MACs and the predicted total number of packages to get a percent estimation of the crowdedness in the spaces. The contribution of using the total number of data packages allowed us to get even better accuracy at the final percent crowdedness conversion.\\
 
+\noindent In addition to what is implemented already, our modular approach to the project by separating the models (see Figure \ref{fig:v3}) for processing the number of unique MACs and total package count data, we have the freedom to add more features and more inputs to the system. For example, we can easily add a camera model, CO$_2$ sensor model, or sound sensor model and feed their results into the \texttt{busyness\_model} and get the expected percentage result in a more accurate way. Collecting data for a longer time would also contribute to the accuracy since we can observe the periodical activities better.\\
 
-
-
-How networks work
-Dealing with real life data collection
-Choosing parameters carefully
-Choosing to many variables decrease LSTM’s ability recognize features
-Using frame count in addition to MAC addresses for making the prediction
-Modularity within the project components
-Models used are open to adding more features in the future
-
-
+\noindent Last but not least, we can deploy more WiFi probes around the campus and add validation option for users to get a feedback on the predictions of the model as a part of our future work. This would help us label the collected data with actual number of people present in a space. As a result, we can trying using supervised machine learning algorithms as well. Also, the model can be optimized to run on the WiFi probes themselves directly and more data can be processed in fewer time by distributing the processing power.
 
 %%%%%%%%%%%%%%%%
 %% Conclusion %%
 %%%%%%%%%%%%%%%%
-\section{Conclusion} 
+\section{Conclusion}
+\noindent As a conclusion, we have built a fully functioning system that collects WiFi data, uses LSTM model to processes the data, and presents the predicted crowdedness to the members of the NYUAD community. The final interface of the project is live at \href{https://nyuad.app/flyway}{nyuad.app/flyway} website and ready to use. The user interface, WiFi sensors, database, and the LSTM model all work together to provide a crowdedness forecast to the users. The data collected by the WiFi probes are stored in the database. The LSTM model periodically fetches the collected data and makes predictions, which are recorded into the database as well. Finally, the user interface has access to all of the past data and predictions. User interface shows all of these to the user in an elegant way.\\
 
-\noindent The user interface, WiFi sensors, database, and the LSTM model all work together to provide a crowdedness forecast to the users. The data collected by the WiFi probes are stored in the database. The LSTM model periodically fetches the collected data and makes predictions, which are recorded into the database as well. Finally, the user interface has access to all of the past data and predictions. User interface shows all of these to the user in an elegant way.
+\noindent During the process, we learned a lot about networking and how to sniff network traffic. We believe in the famous saying \textit{"Garbage in, garbage out"} and we needed to spend a lot of time to make sure that we collect data in a meaningful and the data we collect is capable of explaining the crowdedness in a space. The other thing we learned was choosing parameters and features carefully. We observed that feeding too much data with to many parameters decrease the accuracy of LSTM model a lot. Therefore, fine tuning the amount that works the best was another learning experience for us.\\
 
-
-> Future work
-Adding validation option for users 
-Cross checking results with actual people count in the spaces
-Labelling
-Deploying the data collectors in more areas on the campus
-Extending the collected data types
-Sound data
-Co2 data
-Camera maybe?
-Improving the model and running the model directly on the data collection nodes for distributing the computation
-Capturing a longer term data to capture more trends in the data
-
+\noindent Finally, we believe that this work can be further extended to the whole NYUAD campus to provide a better user experience while letting NYUAD administrators understand how campus space is being utilized. As a result, NYUAD administration can do better planning while students wait less in the line and study \& have fun better. This work can also potentially be converted into a startup and the crowdedness prediction mechanism can be marketed to other universities and companies.
 
 
 \printbibliography
