@@ -63,11 +63,11 @@ breakatwhitespace=false,
 \pagenumbering{arabic}
 \setcounter{page}{1}
 
-\title{\LARGE{Flyway: Predicting Foot Traffic in Open Spaces on Campus}}
+\title{\Large{Flyway: Crowdedness Detection and Prediction Based on Surrounding WiFi Signals and Reccurent Neural Networks}}
 
 \author{ ENGR-UH 4560 Machine Learning, Fall 2019\\
 \medskip
-Nishant Aswani,~\IEEEmembership{nsa325@nyu.edu}
+Nishant Aswani,~\IEEEmembership{nsa325@nyu.edu} \;\;
 Barkin Simsek,~\IEEEmembership{bs3528@nyu.edu}}% <-this % stops a space
 
 
@@ -92,13 +92,11 @@ Barkin Simsek,~\IEEEmembership{bs3528@nyu.edu}}% <-this % stops a space
 \subsection{Motivation}
 \IEEEPARstart{P}\lowercase{redicting} traffic is one of the most common timeseries forecasting problems available for tackling. When placed in the context of smart cities, the problem is motivated by the question of "how to enable users to make smarter choices when using transportation networks" \cite{lv2014traffic}. However, this can be broadened to include how smart choices are made for using infrastructure and public spaces in general. \\
 
-\noindent Given that our campus has multiple open spaces for students to study and/or relax, we want to be able to forecast the foot traffic that occurs in the multiple spaces. This could eventually be furthered, and the information organized, to provide a live prediction visualization of foot traffic around campus.
+\noindent Given that our campus has multiple open spaces for students to study and/or relax, we want to be able to forecast the crowdedness that occurs in these spaces. When combined with an interface to visualize the forecasts and historical data, this can be used as a powerful decision making tool.
 
 \subsection{Problem Statement}
 
-\noindent Gathering from our previous experience with the New York City (NYC) taxi data set, we had a rough idea on how to approach timeseries data, along with the models and analysis that is carried out on such data. We were able to draw parallels between foot traffic in our project to pickup counts in certain locations in NYC.
-
-\noindent In order to collect foot traffic, we determined that registering the device addresses would be a robust method involving little overhead. Students almost always carry their laptops and mobile devices with them as they move to study areas. Hence, our project could potentially focus on two topics: (1) how do we map the MAC addresses to the number of people and (2) are we able to forecast the "busyness" of a given space. As tackling both of these aspects may not fit within our timeframe, we have decided to focus on the latter. We recognize the former will remain a challenge; however, we will approach it either with some simplifying assumptions or a pre-existing solution.
+\noindent Gathering from our previous experience with the New York City (NYC) taxi data set, we had experinece approaching timeseries data, along with the typical models used and analyses carried out on such projects. In order to gather a sense of crowdedness in a rom, we determined that registering the device addresses along with packet transfers would be a robust method involving little overhead. Students almost always carry their laptops and mobile devices with them as they move around on campus. Hence, our project aims to forecast the crowdedness of a location using the combination of the number of unique MAC addresses and the number of packages sent within a given hour.
 
 %%%%%%%%
 % NOTE %
