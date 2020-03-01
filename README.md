@@ -1,7 +1,5 @@
 # flyway
 
-*This project is a work in progress. Please check back for updates.*
-
 ![alt text](misc/Logo/Logo-03.png)
 
 ## About The Project
